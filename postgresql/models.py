@@ -60,7 +60,7 @@ class Comapny(Base):
     id         = Column(Integer, primary_key=True, index=True)
     name       = Column(Integer)
     created_at = Column(DateTime, nullable=False, default=func.utc_timestamp())
-    updated_at = Column(DateTime, nullable=False, default=func.utc_timestamp(), onupdate=func.utc_timestamp())
+    updated_at = Column(DateTime, nullable=True, default=func.utc_timestamp(), onupdate=func.utc_timestamp())
 
 class Influencer(Base):
     __tablename__ = "influencers"
@@ -69,7 +69,7 @@ class Influencer(Base):
     name            = Column(String)
     profile_image   = Column(URLType)
     created_at      = Column(DateTime, nullable=False, default=func.utc_timestamp())
-    updated_at      = Column(DateTime, nullable=False, default=func.utc_timestamp(), onupdate=func.utc_timestamp())
+    updated_at      = Column(DateTime, nullable=True, default=func.utc_timestamp(), onupdate=func.utc_timestamp())
     company         = Column(Integer, ForeignKey('companies.id'))
     sns             = relationship("SnsInfo", back_populates="influencers")
     campaigns       = relationship("InfluencerPost", back_populates="influencers")
@@ -85,7 +85,7 @@ class Campaign(Base):
     description        = Column(String)
     end_at             = Column(DateTime)
     created_at         = Column(DateTime, nullable=False, default=func.utc_timestamp())
-    updated_at         = Column(DateTime, nullable=False, default=func.utc_timestamp(), onupdate=func.utc_timestamp())
+    updated_at         = Column(DateTime, nullable=True, default=func.utc_timestamp(), onupdate=func.utc_timestamp())
     influencer_posts   = relationship("InfluencerPost", back_populates="campaigns")
 
 class Sns(Base):
@@ -94,7 +94,7 @@ class Sns(Base):
     id          = Column(Integer, primary_key=True, index=True)
     name        = Column(String)
     created_at  = Column(DateTime, nullable=False, default=func.utc_timestamp())
-    updated_at  = Column(DateTime, nullable=False, default=func.utc_timestamp(), onupdate=func.utc_timestamp())
+    updated_at  = Column(DateTime, nullable=True, default=func.utc_timestamp(), onupdate=func.utc_timestamp())
     influencers = relationship("SnsInfo", back_populates="sns")
 
 
