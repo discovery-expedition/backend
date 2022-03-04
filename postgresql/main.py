@@ -1,10 +1,10 @@
 from fastapi import FastAPI
 from database import engine
-from models.influencer import Influencer
+import models
 
 app = FastAPI()
 
-Influencer.metadata.create_all(bind=engine)
+models.Base.metadata.create_all(bind=engine)
 
 @app.get("/")
 async def create_database():
