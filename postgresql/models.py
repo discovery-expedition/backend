@@ -43,7 +43,7 @@ class InfluencerPost(Base):
 
     id                     = Column(Integer, primary_key=True, index=True)
     tag                    = Column(String)
-    url                    = Column(Integer)
+    url                    = Column(URLType)
     campaign_id            = Column(ForeignKey('campaigns.id'))
     influencer_id          = Column(ForeignKey('influencers.id'))
 
@@ -75,12 +75,13 @@ class Influencer(Base):
 
     id              = Column(Integer, primary_key=True, index=True)
     name            = Column(String)
+    full_name       = Column(String)
     profile_image   = Column(URLType)
     created_at      = Column(DateTime, nullable=False, default=func.utc_timestamp())
     updated_at      = Column(DateTime, nullable=True, default=func.utc_timestamp(), onupdate=func.utc_timestamp())
-    company         = Column(Integer, ForeignKey('companies.id'))
+    company_id      = Column(Integer, ForeignKey('companies.id'))
 
-    company1 = relationship('Company', primaryjoin='Influencer.company == Company.id', backref='influencers')
+    company = relationship('Company', primaryjoin='Influencer.company == Company.id', backref='influencers')
 
 class Campaign(Base):
     __tablename__ = "campaigns"
