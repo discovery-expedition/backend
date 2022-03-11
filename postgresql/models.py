@@ -111,11 +111,3 @@ class SocialNetworkService(Base):
     name       = Column(String)
     created_at = Column(DateTime, nullable=False, default=func.utc_timestamp())
     updated_at = Column(DateTime, nullable=True, default=func.utc_timestamp(), onupdate=func.utc_timestamp())
-
-
-
-
-
-
-
-
