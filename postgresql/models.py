@@ -48,7 +48,8 @@ class Insight(Base):
 class InfluencerPost(Base):
     __tablename__ = 'influencer_posts'
 
-    id            = Column(String)
+    id            = Column(Integer, primary_key=True, index=True)
+    tag           = Column(String)
     url           = Column(URLType)
     campaign_id   = Column(ForeignKey('campaigns.id'))
     influencer_id = Column(ForeignKey('influencers.id'))
@@ -57,7 +58,6 @@ class InfluencerPost(Base):
                                backref='influencer_posts')
     influencer = relationship('Influencer', primaryjoin='InfluencerPost.influencer_id == Influencer.id',
                                  backref='influencer_posts')
-
 
 class Performance(Base):
     __tablename__ = "performances"
