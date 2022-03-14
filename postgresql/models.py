@@ -102,7 +102,7 @@ class Campaign(Base):
     description = Column(String)
     end_at      = Column(DateTime)
     image       = Column(URLType)
-    budget      = Column(integer)
+    budget      = Column(Integer)
     created_at  = Column(DateTime, nullable=False, default=func.utc_timestamp())
     updated_at  = Column(DateTime, nullable=True, default=func.utc_timestamp(), onupdate=func.utc_timestamp())
 
