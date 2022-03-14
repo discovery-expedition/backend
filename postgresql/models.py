@@ -1,3 +1,4 @@
+from numpy import integer
 from sqlalchemy          import Column, Integer, String, ForeignKey, Table, DateTime, func
 from sqlalchemy_utils    import URLType
 from sqlalchemy.orm      import relationship
@@ -101,6 +102,7 @@ class Campaign(Base):
     description = Column(String)
     end_at      = Column(DateTime)
     image       = Column(URLType)
+    budget      = Column(integer)
     created_at  = Column(DateTime, nullable=False, default=func.utc_timestamp())
     updated_at  = Column(DateTime, nullable=True, default=func.utc_timestamp(), onupdate=func.utc_timestamp())
 
