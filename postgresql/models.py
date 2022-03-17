@@ -55,8 +55,9 @@ class InfluencerPost(Base):
     id            = Column(Integer, primary_key=True, index=True)
     tag           = Column(String)
     url           = Column(URLType)
+    created_at    = Column(DateTime, nullable=False, default=func.utc_timestamp())
     campaign_id   = Column(ForeignKey('campaigns.id'))
-    influencer_id = Column(ForeignKey('influencers.id'))
+    influencer_id = Column(ForeignKey('influencers.id'))    
 
     campaign = relationship('Campaign', primaryjoin='InfluencerPost.campaign_id == Campaign.id',
                                backref='influencer_posts')
