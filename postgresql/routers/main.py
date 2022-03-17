@@ -6,7 +6,7 @@ from enum import Enum
 from typing import Optional
 from fastapi import APIRouter, Depends
 from database import engine, SessionLocal
-from sqlalchemy.orm import Session, contains_eager, joinedload, aliased
+from sqlalchemy.orm import Session
 from sqlalchemy import func, desc
 
 router = APIRouter(
@@ -30,7 +30,7 @@ class StatusFilter(str, Enum):
     completion = "completion"
 
 @router.get("/influencer/{status_filter}")
-async def abc(status_filter: StatusFilter, search: Optional[str] = None, db: Session = Depends(get_db)):
+async def main_influencer(status_filter: StatusFilter, search: Optional[str] = None, db: Session = Depends(get_db)):
     Influencers = db.query(models.Influencer, \
         func.avg(models.Insight.like).label('average_like'), \
         func.avg(models.Insight.comment).label('average_comment'), \
@@ -53,29 +53,11 @@ async def abc(status_filter: StatusFilter, search: Optional[str] = None, db: Ses
     
     if search:
         campaigns = campaigns.filter(models.Campaign.name.contains(search))
-    
-    results = [{
-        "id"                    : Influencer[0].id,
-        "profile_image"         : Influencer[0].profile_image,
-        "updated_at"            : Influencer[0].updated_at,
-        "full_name"             : Influencer[0].full_name,
-        "name"                  : Influencer[0].name,
-        "created_at"            : Influencer[0].created_at,
-        "updated_at"            : Influencer[0].updated_at,
-        "average_like"          : int(Influencer.average_like),
-        "average_comment"       : int(Influencer.average_comment),
-        "average_exposure"      : int(Influencer.average_exposure),
-        "average_participation" : int(Influencer.average_like) + int(Influencer.average_comment),
-        "average_rate"          : round((Influencer.average_like + Influencer.average_comment) / \
-                                 (Influencer.average_female_follower + Influencer.average_male_follower) * 100, 3),
-        "follower"              : int(Influencer.average_female_follower + Influencer.average_male_follower),
-        "campaign_status" : "완료" if datetime.datetime.utcnow() >= Influencer[0].influencer_posts[0].campaign.end_at else "진행 중",
-    } for Influencer in Influencers]
 
-    return results
+    return Influencers.all()
 
 @router.get("/campagin/{status_filter}")
-async def abc(status_filter: StatusFilter, search: Optional[str] = None,  db: Session = Depends(get_db)):
+async def main_campaign(status_filter: StatusFilter, search: Optional[str] = None,  db: Session = Depends(get_db)):
     campaigns = db.query(models.Campaign, \
         func.avg(models.Insight.like).label('average_like'), \
         func.avg(models.Insight.comment).label('average_comment'), \
@@ -97,22 +79,4 @@ async def abc(status_filter: StatusFilter, search: Optional[str] = None,  db: Se
     if search:
         campaigns = campaigns.filter(models.Campaign.name.contains(search))
     
-    results = [{
-        "id"              : campaign[0].id,
-        "name"            : campaign[0].name,
-        "tag"             : campaign[0].tag,
-        "description"     : campaign[0].description,
-        "end_at"          : campaign[0].end_at,
-        "image"           : campaign[0].image,
-        "created_at"      : campaign[0].created_at,
-        "updated_at"      : campaign[0].updated_at,
-        "average_like"    : int(campaign.average_like),
-        "average_comment" : int(campaign.average_comment),
-        "average_exposure": int(campaign.average_exposure),
-        "average_participation": int(campaign.average_like) + int(campaign.average_comment),
-        "average_rate"         : round((campaign.average_like + campaign.average_comment) / \
-                                 (campaign.average_female_follower + campaign.average_male_follower) * 100, 3),
-        "campaign_status" : "완료" if datetime.datetime.utcnow() >= campaign[0].end_at else "진행 중"
-    } for campaign in campaigns]
-
-    return results
+    return campaigns.all()
