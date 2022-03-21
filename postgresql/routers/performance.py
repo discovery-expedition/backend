@@ -6,10 +6,10 @@ from enum           import Enum
 from pymysql        import Date
 from fastapi        import APIRouter, Depends
 from database       import engine, SessionLocal
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from sqlalchemy     import distinct, func, desc, cast, Date, and_
 from pydantic       import BaseModel, AnyUrl, Field
-from typing         import List
+from typing         import List, Optional, Dict ,Union
 
 router = APIRouter(
     prefix="/performance",
