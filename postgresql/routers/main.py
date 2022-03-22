@@ -80,7 +80,7 @@ class CampaignSchema(BaseModel):
 @router.get("/influencer/{status_filter}", response_model = List[InfluencerSchema])
 async def main_influencer(status_filter: StatusFilter, search: Optional[str] = None, db: Session = Depends(get_db)):
     Influencers = db.query(models.Influencer, \
-        func.round().avg(models.Insight.like).label('average_like'), \
+        func.avg(models.Insight.like).label('average_like'), \
         func.avg(models.Insight.comment).label('average_comment'), \
         func.avg(models.Insight.exposure).label('average_exposure'),
         func.avg(models.Insight.female_follower).label('average_female_follower'),
@@ -94,17 +94,17 @@ async def main_influencer(status_filter: StatusFilter, search: Optional[str] = N
         order_by(desc(models.Campaign.end_at))
     
     if status_filter == StatusFilter.completion:
-        campaigns = campaigns.filter(datetime.datetime.utcnow() >= models.Campaign.end_at)
+        Influencers = Influencers.filter(datetime.datetime.utcnow() >= models.Campaign.end_at)
     
     if status_filter == StatusFilter.proceeding:
-        campaigns = campaigns.filter(datetime.datetime.utcnow() < models.Campaign.end_at)
+        Influencers = Influencers.filter(datetime.datetime.utcnow() < models.Campaign.end_at)
     
     if search:
-        campaigns = campaigns.filter(models.Campaign.name.contains(search))
+        Influencers = Influencers.filter(models.Campaign.name.contains(search))
 
     return Influencers.all()
 
-@router.get("/campagin/{status_filter}", response_model = List[CampaignSchema])
+@router.get("/campaign/{status_filter}", response_model = List[CampaignSchema])
 async def main_campaign(status_filter: StatusFilter, search: Optional[str] = None,  db: Session = Depends(get_db)):
     campaigns = db.query(models.Campaign, \
         func.avg(models.Insight.like).label('average_like'), \
