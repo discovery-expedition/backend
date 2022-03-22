@@ -53,7 +53,7 @@ class InfluencerPost(Base):
     __tablename__ = 'influencer_posts'
 
     id            = Column(Integer, primary_key=True, index=True)
-    tag           = Column(String)
+    tag           = Column(String(length=(50)))
     url           = Column(URLType)
     created_at    = Column(DateTime, nullable=False, default=func.utc_timestamp())
     campaign_id   = Column(ForeignKey('campaigns.id'))
@@ -77,7 +77,7 @@ class Company(Base):
     __tablename__ = "companies"
 
     id         = Column(Integer, primary_key=True, index=True)
-    name       = Column(String)
+    name       = Column(String(length=(50)))
     created_at = Column(DateTime, nullable=False, default=func.utc_timestamp())
     updated_at = Column(DateTime, nullable=True, default=func.utc_timestamp(), onupdate=func.utc_timestamp())
 
@@ -85,8 +85,8 @@ class Influencer(Base):
     __tablename__ = "influencers"
 
     id            = Column(Integer, primary_key=True, index=True)
-    name          = Column(String)
-    full_name     = Column(String)
+    name          = Column(String(length=(50)))
+    full_name     = Column(String(length=(50)))
     profile_image = Column(URLType)
     created_at    = Column(DateTime, nullable=False, default=func.utc_timestamp())
     updated_at    = Column(DateTime, nullable=True, default=func.utc_timestamp(), onupdate=func.utc_timestamp())
@@ -98,9 +98,9 @@ class Campaign(Base):
     __tablename__ = "campaigns"
 
     id          = Column(Integer, primary_key=True, index=True)
-    name        = Column(String)
-    tag         = Column(String)
-    description = Column(String)
+    name        = Column(String(length=(50)))
+    tag         = Column(String(length=(50)))
+    description = Column(String(length=(500)))
     end_at      = Column(DateTime)
     image       = Column(URLType)
     budget      = Column(Integer)
@@ -111,7 +111,7 @@ class SocialNetworkService(Base):
     __tablename__ = "social_network_services"
 
     id         = Column(Integer, primary_key=True, index=True)
-    name       = Column(String)
+    name       = Column(String(length=(50)))
     created_at = Column(DateTime, nullable=False, default=func.utc_timestamp())
     updated_at = Column(DateTime, nullable=True, default=func.utc_timestamp(), onupdate=func.utc_timestamp())
 
