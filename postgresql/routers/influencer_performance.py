@@ -201,7 +201,7 @@ async def influencer_graph(status_filter: StatusFilter, influencer_id: int = Non
         average_campaign_tag_post_insight = df_campaign_tag_post_insight. \
             groupby(df_campaign_tag_post_insight['created_at'], as_index=False).mean()
         average_influencer_post           = df_influencer_post. \
-            groupby(df_influencer_post['tag'], as_index=False).mean()
+            groupby(df_influencer_post['tag'], as_index=False).mean().head(4)
 
         graph = [
                     {
