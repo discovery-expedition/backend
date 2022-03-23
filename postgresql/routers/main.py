@@ -89,9 +89,7 @@ async def main_influencer(status_filter: StatusFilter, search: Optional[str] = N
         join(models.InfluencerPost). \
         join(models.Insight). \
         join(models.Campaign). \
-        group_by(models.Influencer). \
-        group_by(models.Campaign.end_at). \
-        order_by(desc(models.Campaign.end_at))
+        group_by(models.Influencer.id)
     
     if status_filter == StatusFilter.completion:
         Influencers = Influencers.filter(datetime.datetime.utcnow() >= models.Campaign.end_at)

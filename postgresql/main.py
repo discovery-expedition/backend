@@ -2,7 +2,7 @@ from pip import main
 import models
 from fastapi  import FastAPI, Depends
 from database import engine
-from routers  import main, performance, auth
+from routers  import main, performance, influencer_performance, auth
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
@@ -19,11 +19,8 @@ models.Base.metadata.create_all(bind=engine)
 
 app.include_router(main.router)
 app.include_router(performance.router)
+app.include_router(influencer_performance.router)
 app.include_router(auth.router)
-
-@app.get("/")
-async def create_database():
-	return {"Database": "created"}
 
 
 
