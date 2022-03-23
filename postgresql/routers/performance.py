@@ -66,29 +66,29 @@ class CampaignBase(BaseModel):
         orm_mode = True
 
 class TodayPostCountSchema(BaseModel):
-    count_post              : int = Field(None)
+    count_post : int = Field(None)
     class Config:
         orm_mode = True
 
 class CampaignSchema(BaseModel):
-    Campaign                : CampaignBase = Field(None)
-    sum_hashtag             : float        = Field(None)
-    average_like            : float        = Field(None)
-    average_exposure        : float        = Field(None)
-    average_comment         : float        = Field(None)
+    Campaign         : CampaignBase = Field(None)
+    average_hashtag  : int          = Field(None)
+    average_like     : int          = Field(None)
+    average_exposure : int          = Field(None)
+    average_comment  : int          = Field(None)
 
     class Config:
         orm_mode = True
 
 class ProceedingSchema(CampaignSchema):
-    daily_official_visit          : float        = Field(None)
-    daily_official_follower       : float        = Field(None)
-    daily_official_referrer       : float        = Field(None)
+    daily_official_visit    : int = Field(None)
+    daily_official_follower : int = Field(None)
+    daily_official_referrer : int = Field(None)
 
 class CompletionSchema(CampaignSchema):
-    total_official_visit          : float        = Field(None)
-    total_official_follower       : float        = Field(None)
-    total_official_referrer       : float        = Field(None)
+    total_official_visit    : int = Field(None)
+    total_official_follower : int = Field(None)
+    total_official_referrer : int = Field(None)
 
 @router.get("/post_count", response_model=List[TodayPostCountSchema])
 async def post_count(status_filter: StatusFilter, campaign_id: int = None, db: Session = Depends(get_db)):
@@ -130,7 +130,7 @@ async def campaign_proceeding_graph(campaign_id: int = None, db: Session = Depen
             (df_campaign_tag_post_insight['created_at'] < (datetime.datetime.now() - datetime.timedelta(days=1)))]
 
     sum_campaign_tag_post_insight = df_campaign_tag_post_insight. \
-        groupby(df_campaign_tag_post_insight['created_at'], as_index=False).sum()
+        groupby(df_campaign_tag_post_insight['created_at'], as_index=False).mean()
     count_post_date = df_influencer_post. \
         groupby(df_influencer_post['created_at'], as_index=False).count()
     count_post      = df_influencer_post. \
@@ -149,18 +149,18 @@ async def campaign_proceeding_graph(campaign_id: int = None, db: Session = Depen
 
     return graph
 
-@router.get("/completion_graph",response_model=CompletionGraph)
+@router.get("/completion_graph", response_model=CompletionGraph)
 async def campaign_completion_graph(campaign_id: int = None, db: Session = Depends(get_db)):
     campaigns = db.query(models.Campaign, 
         func.count(distinct(models.InfluencerPost.id)).label('count_post'), 
         func.count(distinct(models.InfluencerPost.influencer_id)).label('count_influencer'),
-        func.sum(models.Insight.hashtag).label('sum_hashtag'),
+        func.avg(models.Insight.hashtag).label('average_hashtag'),
         func.avg(models.Insight.like).label('average_like'),
         func.avg(models.Insight.exposure).label('average_exposure'),
         func.avg(models.Insight.comment).label('average_comment'),
-        func.sum(models.Insight.official_visit).label('total_official_visit'),
-        func.sum(models.Insight.official_follower).label('total_official_follower'),
-        func.sum(models.Insight.official_referrer).label('total_official_referrer')). \
+        func.avg(models.Insight.official_visit).label('total_official_visit'),
+        func.avg(models.Insight.official_follower).label('total_official_follower'),
+        func.avg(models.Insight.official_referrer).label('total_official_referrer')). \
         select_from(models.Campaign). \
         join(models.InfluencerPost). \
         join(models.Insight). \
@@ -182,7 +182,7 @@ async def campaign_completion_graph(campaign_id: int = None, db: Session = Depen
 
     graph = {
         "date_graph"              : df_campaign['created_at'].tolist(),
-        "hashtag_graph"           : df_campaign['sum_hashtag'].tolist(),
+        "hashtag_graph"           : df_campaign['average_hashtag'].tolist(),
         "count_post"              : df_campaign['count_post'].tolist(),
         "total_official_visit"    : df_campaign['total_official_visit'].tolist(),
         "total_official_follower" : df_campaign['total_official_follower'].tolist(),
@@ -198,17 +198,21 @@ async def campaign_completion(status_filter: StatusFilter, campaign_id: int = No
     campaigns = db.query(models.Campaign,
         func.count(distinct(models.InfluencerPost.id)).label('count_post'), 
         func.count(distinct(models.InfluencerPost.influencer_id)).label('count_influencer'),
-        func.sum(models.Insight.hashtag).label('sum_hashtag'),
+        func.avg(models.Insight.hashtag).label('average_hashtag'),
         func.avg(models.Insight.like).label('average_like'),
         func.avg(models.Insight.exposure).label('average_exposure'),
         func.avg(models.Insight.comment).label('average_comment'),
-        func.sum(models.Insight.official_visit).label('total_official_visit'),
-        func.sum(models.Insight.official_follower).label('total_official_follower'),
-        func.sum(models.Insight.official_referrer).label('total_official_referrer')). \
+        func.avg(models.Insight.official_visit).label('total_official_visit'),
+        func.avg(models.Insight.official_follower).label('total_official_follower'),
+        func.avg(models.Insight.official_referrer).label('total_official_referrer')). \
         select_from(models.Campaign). \
+        group_by(models.Campaign.id). \
         join(models.InfluencerPost). \
         join(models.Insight). \
-        group_by(models.Campaign.id)
+        filter(and_(models.InfluencerPost.campaign_id != None, 
+                    models.Campaign.id == models.InfluencerPost.campaign_id, 
+                    models.InfluencerPost.id == models.Insight.influencer_post_id))
+        
 
     if status_filter == StatusFilter.completion:
         campaigns = campaigns.filter(datetime.datetime.now() >= models.Campaign.end_at)
@@ -224,13 +228,13 @@ async def campaign_completion(status_filter: StatusFilter, campaign_id: int = No
 @router.get("/proceeding", response_model=List[ProceedingSchema])
 async def campaign_proceeding(status_filter: StatusFilter, campaign_id: int = None, db: Session = Depends(get_db)):
     campaigns = db.query(models.Campaign, 
-        func.sum(models.Insight.hashtag).label('sum_hashtag'),
-        func.sum(models.Insight.like).label('average_like'),
-        func.sum(models.Insight.exposure).label('average_exposure'),
-        func.sum(models.Insight.comment).label('average_comment'),
-        func.sum(models.Insight.official_visit).label('daily_official_visit'),
-        func.sum(models.Insight.official_follower).label('daily_official_follower'),
-        func.sum(models.Insight.official_referrer).label('daily_official_referrer')). \
+        func.avg(models.Insight.hashtag).label('average_hashtag'),
+        func.avg(models.Insight.like).label('average_like'),
+        func.avg(models.Insight.exposure).label('average_exposure'),
+        func.avg(models.Insight.comment).label('average_comment'),
+        func.avg(models.Insight.official_visit).label('daily_official_visit'),
+        func.avg(models.Insight.official_follower).label('daily_official_follower'),
+        func.avg(models.Insight.official_referrer).label('daily_official_referrer')). \
         group_by(models.Campaign.id). \
         filter(and_(models.InfluencerPost.campaign_id != None, 
                     models.Campaign.id == models.InfluencerPost.campaign_id, 
